@@ -64,7 +64,7 @@ void printNode(Node *node)
 {
     assert(node);
     
-    writeLogs("    elem_%x[style = \"filled\", shape = record,fillcolor = \"green\", label = \"", node);
+    writeLogs("    elem_%x[style = \"filled\", shape = record,fillcolor = \"#48D1CC\", label = \"", node);
     printNodeValue(node);
     writeLogs("| type = ");
     printType(node);

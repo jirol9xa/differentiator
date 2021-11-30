@@ -16,6 +16,13 @@ extern Tree rslt_tree;
     dest->node_type    = IS_NUMBER;                                                          \
     dest->value.number = arg;
 
+#define LEFT      dest->left_child
+#define RIGHT     dest->right_child
+#define LEFTLEFT  dest->left_child->left_child
+#define LEFTRIGHT dest->left_child->right_child
+
+static int removeConst(Node *node);
+
 
 int readFormula(FILE *sourse, Tree *tree)
 {
@@ -53,6 +60,8 @@ int readFormula(FILE *sourse, Tree *tree)
                 continue;
             }
             
+            tree->size ++;
+
             if (cur_node->left_child == nullptr)
             {
                 PRINT_LINE;
@@ -168,31 +177,48 @@ int diffNode(Node *dest, Node *sourse)
 
     treeDump(&rslt_tree);
 
-    switch (sourse->node_type)
+    switch (sourse->node_type & (IS_COS - 1))
     {
-    case IS_VARIABLE:
-        NEW_NUMBER_NODE(1);
-        break;
-    case IS_NUMBER:
-        NEW_NUMBER_NODE(0);
-    case IS_OPERATOR:
-        switch (sourse->value.symbol)
-        {
-        case '*':
-            PRINT_LINE;
-            diffMul(dest, sourse);
+        case IS_VARIABLE:
+            NEW_NUMBER_NODE(1);
             break;
-        case '+':
-            PRINT_LINE;
-            diffAdd(dest, sourse);
+        case IS_NUMBER:
+            NEW_NUMBER_NODE(0);
+        case IS_OPERATOR:
+            switch (sourse->value.symbol)
+            {
+                case '*':
+                    PRINT_LINE;
+                    diffMul(dest, sourse);
+                    break;
+                case '+':
+                    PRINT_LINE;
+                    diffAdd(dest, sourse);
+                    break;
+                case '-':
+                    diffSub(dest, sourse);
+                    break;
+                case '/':
+                    diffDiv(dest, sourse);
+                    break;
+            }
+    
             break;
-        case '-':
-            diffSub(dest, sourse);
+        case IS_FUNC:
+            switch (sourse->node_type & (~(IS_COS - 1)))
+            {
+                case IS_COS:
+                    diffCos(dest, sourse);
+                    break;
+                case IS_SIN:
+                    diffSin(dest, sourse);
+                    break;
+                case IS_LN:
+                    diffLn(dest, sourse);
+                    break;
+            }
+            
             break;
-        case '/':
-            diffDiv(dest, sourse);
-            break;
-        }
     }
 
     return 0;
@@ -226,14 +252,12 @@ int treeCpy(Node *dest, Node *sourse)
     if (sourse->left_child)
     {
         dest->left_child = (Node *) calloc(1, sizeof(Node));
-        assert(dest->left_child);
 
         treeCpy(dest->left_child, sourse->left_child);
     }
     if (sourse->right_child)
     {
         dest->right_child = (Node *) calloc(1, sizeof(Node));
-        assert(dest->right_child);
 
         treeCpy(dest->right_child, sourse->right_child);
     }
@@ -250,37 +274,24 @@ int diffMul(Node *dest, Node *sourse)
     dest->node_type   |= IS_OPERATOR;
     dest->value.symbol = '+';
 
-    #define left  dest->left_child
-    #define right dest->right_child
-
-    left  = (Node *) calloc(1, sizeof(Node));
-    right = (Node *) calloc(1, sizeof(Node));
-    assert(left);
-    assert(right);
-    printf("left = %p\nleft_child = %p\n", left, dest->left_child);
+    LEFT  = (Node *) calloc(1, sizeof(Node));
+    RIGHT = (Node *) calloc(1, sizeof(Node));
     
-    left->node_type    |= IS_OPERATOR;
-    left->value.symbol  = '*';
-    right->node_type   |= IS_OPERATOR;
-    right->value.symbol = '*';
+    LEFT->node_type    |= IS_OPERATOR;
+    LEFT->value.symbol  = '*';
+    RIGHT->node_type   |= IS_OPERATOR;
+    RIGHT->value.symbol = '*';
 
-    left->left_child   = (Node *) calloc(1, sizeof(Node));
-    assert(left->left_child);
-    left->right_child  = (Node *) calloc(1, sizeof(Node));
-    assert(left->right_child);
-    right->left_child  = (Node *) calloc(1, sizeof(Node));
-    assert(right->left_child);
-    right->right_child = (Node *) calloc(1, sizeof(Node));
-    assert(right->right_child);
+    LEFT->left_child   = (Node *) calloc(1, sizeof(Node));
+    LEFT->right_child  = (Node *) calloc(1, sizeof(Node));
+    RIGHT->left_child  = (Node *) calloc(1, sizeof(Node));
+    RIGHT->right_child = (Node *) calloc(1, sizeof(Node));
 
-    #undef left
-    #undef right
+    diffNode(LEFT->left_child, sourse->left_child);
+    treeCpy(LEFT->right_child, sourse->right_child);
 
-    diffNode(dest->left_child->left_child, sourse->left_child);
-    treeCpy(dest->left_child->right_child, sourse->right_child);
-
-    diffNode(dest->right_child->right_child, sourse->right_child);
-    treeCpy(dest->right_child->left_child, sourse->left_child);
+    diffNode(RIGHT->right_child, sourse->right_child);
+    treeCpy(RIGHT->left_child, sourse->left_child);
 
     return 0;
 }
@@ -294,13 +305,10 @@ int diffAdd(Node *dest, Node *sourse)
     dest->node_type   |= IS_OPERATOR;
     dest->value.symbol = '+';
 
-    dest->left_child  = (Node *) calloc(1, sizeof(Node));
-    assert(dest->left_child);
-    dest->right_child = (Node *) calloc(1, sizeof(Node));
-    assert(dest->right_child);
-    PRINT_LINE;
+    LEFT  = (Node *) calloc(1, sizeof(Node));
+    RIGHT = (Node *) calloc(1, sizeof(Node));
+
     diffNode(dest->left_child, sourse->left_child);
-    PRINT_LINE;
     diffNode(dest->right_child, sourse->right_child);
 
     return 0;
@@ -315,13 +323,11 @@ int diffSub(Node *dest, Node *sourse)
     dest->node_type   |= IS_OPERATOR;
     dest->value.symbol = '-';
 
-    dest->left_child  = (Node *) calloc(1, sizeof(Node));
-    assert(dest->left_child);
-    dest->right_child = (Node *) calloc(1, sizeof(Node));
-    assert(dest->right_child);
+    LEFT  = (Node *) calloc(1, sizeof(Node));
+    RIGHT = (Node *) calloc(1, sizeof(Node));
 
-    diffNode(dest->left_child, sourse->left_child);
-    diffNode(dest->right_child, sourse->right_child);
+    diffNode(LEFT, sourse->left_child);
+    diffNode(RIGHT, sourse->right_child);
 
     return 0;    
 }
@@ -335,57 +341,319 @@ int diffDiv(Node *dest, Node *sourse)
     dest->node_type     = IS_OPERATOR;
     dest->value.symbol |= '/';
 
-    #define left  dest->left_child
-    #define right dest->right_child
+    LEFT  = (Node *) calloc(1, sizeof(Node));
+    RIGHT = (Node *) calloc(1, sizeof(Node));
 
-    left  = (Node *) calloc(1, sizeof(Node));
-    assert(left);
-    right = (Node *) calloc(1, sizeof(Node));
-    assert(right);
+    LEFT->node_type    |= IS_OPERATOR;
+    LEFT->value.symbol  = '-';
+    RIGHT->node_type   |= IS_OPERATOR;
+    RIGHT->value.symbol = '*';
 
-    left->node_type    |= IS_OPERATOR;
-    left->value.symbol  = '-';
-    right->node_type   |= IS_OPERATOR;
-    right->value.symbol = '*';
+    RIGHT->left_child  = (Node *) calloc(1, sizeof(Node));
+    RIGHT->right_child = (Node *) calloc(1, sizeof(Node));
 
-    right->left_child  = (Node *) calloc(1, sizeof(Node));
-    assert(right->left_child);
-    right->right_child = (Node *) calloc(1, sizeof(Node));
-    assert(right->right_child);
+    treeCpy(RIGHT->left_child,  sourse->right_child);
+    treeCpy(RIGHT->right_child, sourse->right_child);
+    
 
-    treeCpy(right->left_child,  sourse->right_child);
-    treeCpy(right->right_child, sourse->right_child);
+    LEFTLEFT  = (Node *) calloc(1, sizeof(Node));
+    LEFTRIGHT = (Node *) calloc(1, sizeof(Node));
 
-    #define leftleft  dest->left_child->left_child
-    #define leftright dest->left_child->right_child
+    LEFTLEFT->node_type    |= IS_OPERATOR;
+    LEFTLEFT->value.symbol  = '*';
+    LEFTRIGHT->node_type   |= IS_OPERATOR;
+    LEFTRIGHT->value.symbol = '*';
 
-    leftleft  = (Node *) calloc(1, sizeof(Node));
-    assert(leftleft);
-    leftright = (Node *) calloc(1, sizeof(Node));
-    assert(leftright);
+    LEFTLEFT->left_child   = (Node *) calloc(1, sizeof(Node));
+    LEFTLEFT->right_child  = (Node *) calloc(1, sizeof(Node));
+    LEFTRIGHT->left_child  = (Node *) calloc(1, sizeof(Node));
+    LEFTRIGHT->right_child = (Node *) calloc(1, sizeof(Node));
 
-    leftleft->node_type    |= IS_OPERATOR;
-    leftleft->value.symbol  = '*';
-    leftright->node_type   |= IS_OPERATOR;
-    leftright->value.symbol = '*';
+    diffNode(LEFTLEFT->left_child, sourse->left_child);
+    treeCpy(LEFTLEFT->right_child, sourse->right_child);
 
-    leftleft->left_child   = (Node *) calloc(1, sizeof(Node));
-    assert(leftleft->left_child);
-    leftleft->right_child  = (Node *) calloc(1, sizeof(Node));
-    assert(leftleft->right_child);
-    leftright->left_child  = (Node *) calloc(1, sizeof(Node));
-    assert(leftright->left_child);
-    leftright->right_child = (Node *) calloc(1, sizeof(Node));
-    assert(leftright->right_child);
-
-    #undef leftleft
-    #undef leftright
-
-    diffNode(dest->left_child->left_child->left_child, sourse->left_child);
-    treeCpy(dest->left_child->left_child->right_child, sourse->right_child);
-
-    diffNode(dest->left_child->right_child->left_child, sourse->right_child);
-    treeCpy(dest->left_child->right_child->right_child, sourse->left_child);
+    diffNode(LEFTRIGHT->left_child, sourse->right_child);
+    treeCpy(LEFTRIGHT->right_child, sourse->left_child);
 
     return 0;
+}
+
+
+int diffCos(Node *dest, Node *sourse)
+{
+    assert(dest);
+    assert(sourse);
+
+    dest->node_type   |= IS_OPERATOR;
+    dest->value.symbol = '*';
+
+    LEFT  = (Node *) calloc(1, sizeof(Node));
+    RIGHT = (Node *) calloc(1, sizeof(Node));
+
+    LEFT->node_type    |= IS_OPERATOR;
+    LEFT->value.symbol  = '*';
+    RIGHT->node_type   |= IS_NUMBER;
+    RIGHT->value.number = -1;
+
+    LEFTLEFT  = (Node *) calloc(1, sizeof(Node));
+    LEFTRIGHT = (Node *) calloc(1, sizeof(Node));
+
+    LEFTLEFT->node_type |= (IS_FUNC | IS_SIN);
+    LEFTLEFT->value.func = "sin";
+    
+    treeCpy(LEFTLEFT->left_child, sourse->left_child);
+    diffNode(LEFT->right_child, sourse->left_child);
+
+    return 0;
+}
+
+
+int diffSin(Node *dest, Node *sourse)
+{
+    assert(dest);
+    assert(sourse);
+
+    dest->node_type   |= IS_OPERATOR;
+    dest->value.symbol = '*';
+
+    LEFT  = (Node *) calloc(1, sizeof(Node));
+    RIGHT = (Node *) calloc(1, sizeof(Node));
+
+    LEFT->node_type |= IS_FUNC;
+    LEFT->value.func = "cos";
+
+    LEFTLEFT = (Node *) calloc(1, sizeof(Node));
+
+    diffNode(RIGHT, sourse->left_child);
+    treeCpy(LEFTLEFT, sourse->left_child);
+
+    return 0;
+}
+
+
+int diffLn(Node *dest, Node *sourse)
+{
+    assert(dest);
+    assert(sourse);
+
+    dest->node_type   |= IS_OPERATOR;
+    dest->value.symbol = '/';
+
+    dest->left_child  = (Node *) calloc(1, sizeof(Node));
+    dest->right_child = (Node *) calloc(1, sizeof(Node));
+
+    diffNode(LEFT, sourse->left_child);
+    treeCpy(RIGHT, sourse->left_child);
+
+    return 0;
+}
+
+
+int diffPow(Node *dest, Node *sourse)
+{
+    assert(dest);
+    assert(sourse);
+
+    dest->node_type   |= IS_OPERATOR;
+    dest->value.symbol = '*';
+
+    LEFT  = (Node *) calloc(1, sizeof(Node));
+    RIGHT = (Node *) calloc(1, sizeof(Node));
+
+    diffNode(RIGHT, sourse->left_child);
+
+    LEFT->node_type   |= IS_OPERATOR;
+    LEFT->value.symbol = '*';
+ 
+    LEFTLEFT  = (Node *) calloc(1, sizeof(Node));
+    LEFTRIGHT = (Node *) calloc(1, sizeof(Node));
+
+    treeCpy(LEFTLEFT, sourse->right_child);
+
+    LEFTRIGHT->node_type    = IS_OPERATOR;
+    LEFTRIGHT->value.symbol = '^';
+
+    LEFTRIGHT->left_child  = (Node *) calloc(1, sizeof(Node));
+    LEFTRIGHT->right_child = (Node *) calloc(1, sizeof(Node));
+
+    treeCpy(LEFTRIGHT->left_child, sourse->left_child);
+
+    #define LEFTRIGHT2 dest->left_child->right_child->right_child
+
+    LEFTRIGHT2->node_type    = IS_OPERATOR;
+    LEFTRIGHT2->value.symbol = '-';
+
+    LEFTRIGHT2->left_child  = (Node *) calloc(1, sizeof(Node));
+    LEFTRIGHT2->right_child = (Node *) calloc(1, sizeof(Node));
+
+    LEFTRIGHT2->right_child->node_type   |= IS_NUMBER;
+    LEFTRIGHT2->right_child->value.number = 1;
+
+    treeCpy(LEFTRIGHT2->left_child, sourse->right_child);
+
+    #undef LEFTRIGHT2
+
+    return 0;
+}
+
+
+int removeConstant(Tree *tree)
+{
+    assert(tree);
+    if (tree->status & DESTRUCTED_TREE)
+    {
+        printf("!!! ERROR Can't work with destructed tree !!!\n");
+        return -1;
+    }
+
+    int is_removed = 0;
+
+    is_removed = removeConst(&(tree->root));
+
+    return is_removed;
+}
+
+
+static int removeConst(Node *node)
+{
+    assert(node);
+
+    int is_removed = 0;
+
+    if (node->left_child->node_type & IS_OPERATOR)
+    {
+        is_removed = removeConst(node->left_child);
+    }
+    if (node->right_child->node_type & IS_OPERATOR)
+    {
+        is_removed = removeConst(node->right_child);
+    }
+
+    if ((node->left_child->node_type & IS_NUMBER) && (node->right_child->node_type & IS_NUMBER))
+    {
+        node->node_type = IS_NUMBER;
+
+        int left = node->left_child->value.number;
+        int right = node->right_child->value.number;
+
+        switch (node->value.symbol)
+        {
+            case '+':
+                node->value.number = left + right; 
+                break;
+            case '-':
+                node->value.number = left - right;
+                break;
+            case '*':
+                node->value.number = left * right;
+                break;
+            case '/':
+                node->value.number = left / right;
+                break;
+            case '^':
+                node->value.number = pow(left, right);
+                break;
+        }
+
+        free(node->left_child);
+        free(node->right_child);
+
+        node->left_child  = nullptr;
+        node->right_child = nullptr;
+
+        is_removed = 1;
+    }
+
+    return is_removed;
+}
+
+
+int cutTree(Tree *tree)
+{
+    assert(tree);
+    if (tree->status & DESTRUCTED_TREE)
+    {
+        printf("!!! ERROR Can't work with destructed tree !!!\n");
+        return -1;
+    }
+
+    int is_cutted = 0;
+
+    cutNode(&(tree->root));
+
+    return is_cutted;
+}
+
+
+static int cutNode(Node *node)
+{
+    assert(node);
+
+    int is_cutted = 0;
+
+    if (node->left_child->node_type & IS_OPERATOR)
+    {
+        is_cutted = cutNode(node->left_child);
+    }
+    if (node->right_child->node_type & IS_OPERATOR)
+    {
+        is_cutted = cutNode(node->right_child);
+    }
+
+    switch (node->value.symbol)
+    {
+        case '+':
+            is_cutted = !cutPlusMinus(node);
+        case '-':
+            is_cutted = !cutPlusMinus(node);
+        case '*'
+            
+    }
+}
+
+
+int cutPlusMinus(Node *node)
+{
+    assert(node);
+
+    Node *left  = node->left_child;
+    Node *right = node->right_child;
+
+    if (left->node_type & IS_NUMBER)
+    {
+        if (left->value.number == 0)
+        {
+            if (node->parent->left_child == node)
+            {
+                node->parent->left_child = right;
+            }
+            else
+            {
+                node->parent->right_child = right;
+            
+            free(left);
+            free (node);
+            return 0;
+        }
+    }
+    else if (right->node_type & IS_NUMBER)
+    {
+        if (right->value.number == 0)
+        {
+            if (node->parent->left_child == node)
+            {
+                node->parent->left_child = left;
+            }
+            else
+            {
+                node->parent->right_child = left;
+            }
+
+            free(right);
+            free(node);
+            return 0;
+        }
+    }
+
+    return -1;
 }
