@@ -7,8 +7,8 @@
 #include <assert.h>
 
 
-static int printNodeValue(Node *node);
-
+static int  printNodeValue(Node *node);
+static void printType(Node *node);
 
 
 Node *nodeCtor(Node *parent, Node *new_node, int is_left)
@@ -64,8 +64,10 @@ void printNode(Node *node)
 {
     assert(node);
     
-    writeLogs("    elem_%x[style = \"filled\", fillcolor = \"green\", label = \"", node);
+    writeLogs("    elem_%x[style = \"filled\", shape = record,fillcolor = \"green\", label = \"", node);
     printNodeValue(node);
+    writeLogs("| type = ");
+    printType(node);
     writeLogs("\"];\n");
 
     if (node->left_child)
@@ -215,7 +217,7 @@ static int printNodeValue(Node *node)
     {
         writeLogs("%lg", node->value.number);
     }
-    else if ((node->node_type & IS_VARIABLE) || (node->node_type & IS_SYMBOL))
+    else if ((node->node_type & IS_VARIABLE) || (node->node_type & IS_OPERATOR))
     {
         writeLogs("%c", node->value.symbol);
     }
@@ -226,4 +228,26 @@ static int printNodeValue(Node *node)
     }
 
     return 0;
+}
+
+
+static void printType(Node *node)
+{
+    assert(node);
+
+    switch (node->node_type)
+    {
+    case IS_OPERATOR:
+        writeLogs("operator");
+        break;
+    case IS_FUNC:
+        writeLogs("function");
+        break;
+    case IS_NUMBER:
+        writeLogs("number");
+        break;
+    case IS_VARIABLE:
+        writeLogs("variable");
+        break;
+    }
 }

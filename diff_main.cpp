@@ -4,10 +4,13 @@
 #include "include/logsLib.h"
 #include "diff.h"
 
+Tree rslt_tree = {};
+
+
 int main(int argc, const char **argv)
 {
-    Tree tree = {};
-    treeCtor(&tree);
+    Tree srs_tree = {};
+    treeCtor(&srs_tree);
 
     if (argc < 2)
     {
@@ -15,11 +18,16 @@ int main(int argc, const char **argv)
     }
     FILE *sourse = fopen(argv[1], "r");
 
-    readFormula(sourse, &tree);
-    PRINT_LINE;
-    treeDump(&tree);
+    readFormula(sourse, &srs_tree);
+    treeDump(&srs_tree);
 
-    treeDtor(&tree);
+    treeCtor(&rslt_tree);
+
+    diffur(&srs_tree, &rslt_tree);
+    treeDump(&rslt_tree);
+
+    treeDtor(&rslt_tree);
+    treeDtor(&srs_tree);
     fclose(sourse);
     return 0;
 }

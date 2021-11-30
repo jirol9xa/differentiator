@@ -1,7 +1,7 @@
 #ifndef DIFF_H
     #define DIFF_H
 
-    const int IS_SYMBOL   = 1 << 0;
+    const int IS_OPERATOR = 1 << 0;
     const int IS_NUMBER   = 1 << 1;
     const int IS_VARIABLE = 1 << 2;
     const int IS_FUNC     = 1 << 3;
@@ -12,6 +12,13 @@
 
     int readFormula(FILE *sourse, Tree *tree);
     int readArg(Node *node, char *text);
+    int diffur(Tree *sourse, Tree *result);
     
+    int diffNode(Node *dest, Node *sourse);
+    int treeCpy (Node *dest, Node *sourse);
+    int diffMul (Node *dest, Node *sourse);
+    int diffAdd (Node *dest, Node *sourse);
+    int diffSub (Node *dest, Node *sourse);
+    int diffDiv (Node *dest, Node *sourse);
 
 #endif
