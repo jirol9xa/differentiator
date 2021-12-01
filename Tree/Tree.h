@@ -22,7 +22,7 @@
     };
     struct Tree
     {
-        Node root;
+        Node* root;
         int size;
         int status;
     };

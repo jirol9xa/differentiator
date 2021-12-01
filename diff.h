@@ -13,7 +13,7 @@
     int readFormula(FILE *sourse, Tree *tree);
     int readArg(Node *node, char *text);
     int diffur(Tree *sourse, Tree *result);
-    int removeConstant(Tree *tree);
+    int optimiz(Tree *tree);
 
     int diffNode(Node *dest, Node *sourse);
     int treeCpy (Node *dest, Node *sourse);
@@ -26,6 +26,8 @@
     int diffLn  (Node *dest, Node *sourse);
     int diffPow (Node *dest, Node *sourse);
 
+    int removeConstant(Tree *tree);
+    int cutTree(Tree *tree);
 
 
 #endif

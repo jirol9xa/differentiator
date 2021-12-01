@@ -26,6 +26,7 @@ Node *nodeCtor(Node *parent, Node *new_node, int is_left)
     else         
         parent->right_child = new_node;
 
+    PRINT_LINE;
     return new_node; 
 }
 
@@ -34,8 +35,8 @@ int treeCtor(Tree *tree)
 {
     assert(tree);
 
-    tree->root.value  = {};
-    tree->root.parent = nullptr;
+    tree->root = (Node *) calloc(1, sizeof(Node));
+    
     tree->size = 1;
     tree->status |= EMPTY_TREE;
     return 0;
@@ -49,7 +50,7 @@ void treeDump(Tree *tree)
     openLogs("LOGS/logs.dot");  
     writeLogs("digraph G{\n");
 
-    printNode(&(tree->root));
+    printNode(tree->root);
 
     writeLogs("}\n");
 
@@ -88,10 +89,10 @@ int treeDtor(Tree *tree)
 {
     assert(tree);
 
-    nodeDtor(&(tree->root));
-    if (tree->root.node_type & IS_FUNC)
+    nodeDtor(tree->root);
+    if (tree->root->node_type & IS_FUNC)
     {
-        free(tree->root.value.func);
+        free(tree->root->value.func);
     }
 
     tree->size = -1;
@@ -136,15 +137,15 @@ int saveTree(Tree *tree)
     assert(tree);
 
     openLogs("Base");
-    writeLogs("(%s", tree->root.value);
+    writeLogs("(%s", tree->root->value);
 
-    if (tree->root.left_child)
+    if (tree->root->left_child)
     {
-        saveNode(tree->root.left_child);
+        saveNode(tree->root->left_child);
     }
-    if (tree->root.right_child)
+    if (tree->root->right_child)
     {
-        saveNode(tree->root.right_child);
+        saveNode(tree->root->right_child);
     }
 
     writeLogs(")");
