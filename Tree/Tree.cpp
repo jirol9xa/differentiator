@@ -36,7 +36,7 @@ int treeCtor(Tree *tree)
     assert(tree);
 
     tree->root = (Node *) calloc(1, sizeof(Node));
-    
+
     tree->size = 1;
     tree->status |= EMPTY_TREE;
     return 0;
@@ -71,6 +71,10 @@ void printNode(Node *node)
     printType(node);
     writeLogs("\"];\n");
 
+    if (node->parent)
+    {
+        writeLogs("    elem_%x -> elem_%x [color = \"blue\"];\n", node, node->parent);
+    }
     if (node->left_child)
     {
         printNode(node->left_child);
@@ -90,11 +94,7 @@ int treeDtor(Tree *tree)
     assert(tree);
 
     nodeDtor(tree->root);
-    if (tree->root->node_type & IS_FUNC)
-    {
-        free(tree->root->value.func);
-    }
-
+    
     tree->size = -1;
     tree->status |= DESTRUCTED_TREE;
 
@@ -110,23 +110,20 @@ int nodeDtor (Node *node)
     {
         Node *left = node->left_child;
         nodeDtor(left);
-        if (left->node_type & IS_FUNC)
-        {
-            free(left->value.func);  
-        }  
-        free(left);
+        
     }
 
     if (node->right_child)
     {
         Node *right = node->right_child;
         nodeDtor(right);
-        if (right->node_type & IS_FUNC)
-        {
-            free(right->value.func);
-        }
-        free(right);
     }
+
+    if (node->node_type & IS_FUNC)
+    {
+        free(node->value.func);
+    }
+    free(node);
 
     return 0;
 }
@@ -251,4 +248,40 @@ static void printType(Node *node)
         writeLogs("variable");
         break;
     }
+}
+
+
+int printTree(Node *node)
+{
+    assert(node);
+
+    if (node->left_child)
+    {
+        printTree(node->left_child);
+    }
+
+    if (node->node_type & IS_FUNC)
+    {
+        printf("%s", node->value.func);
+    }
+    else if (node->node_type & IS_NUMBER)
+    {
+        printf("%lg", node->value.number);
+    }
+    else if ((node->node_type & IS_VARIABLE) || (node->node_type & IS_OPERATOR))
+    {
+        printf("%c", node->value.symbol);
+    }
+    else
+    {
+        printf("!!! ERROR Invalid node_type !!!\n");
+        return -1;
+    }
+
+    if (node->right_child)
+    {
+        printTree(node->right_child);
+    }
+
+    return 0;
 }

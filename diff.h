@@ -29,5 +29,9 @@
     int removeConstant(Tree *tree);
     int cutTree(Tree *tree);
 
+    int beginTex();
+    int texDump(Tree *tree);
+    int finishTex();
+
 
 #endif

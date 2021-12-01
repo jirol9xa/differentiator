@@ -25,6 +25,7 @@ int main(int argc, const char **argv)
 
     diffur(&srs_tree, &rslt_tree);
     treeDump(&rslt_tree);
+    printTree(rslt_tree.root);
     optimiz(&rslt_tree);
     treeDump(&rslt_tree);
 

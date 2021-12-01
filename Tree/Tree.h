@@ -111,5 +111,7 @@
                 случае
     */
     Node *searchElem(Node *node, type_t elem);
+    int printTree(Node *node);
+
 
 #endif
