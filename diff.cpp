@@ -174,7 +174,7 @@ int diffNode(Node *dest, Node *sourse)
     assert(dest);
     assert(sourse);
 
-    treeDump(&rslt_tree);
+    //treeDump(&rslt_tree);
 
     switch (sourse->node_type & (IS_COS - 1))
     {
@@ -821,21 +821,22 @@ static int cutDiv(Node *node, Tree *tree)
 int optimiz(Tree *tree)
 {
     assert(tree);
-
+    //PRINT_LINE;
     int is_optimized = 0;
 
     do
     {
         is_optimized = 0;
         PRINT_LINE;
+        texDump(tree);
         is_optimized += removeConstant(tree);
         printf("after remove = %d\n", is_optimized);
         PRINT_LINE;
-        treeDump(&rslt_tree);
+        //treeDump(&rslt_tree);
         is_optimized += cutTree(tree);
         printf("after cut = %d\n", is_optimized);
         PRINT_LINE;
-        treeDump(&rslt_tree);
+        //treeDump(&rslt_tree);
     } while (is_optimized);
     
     return 0;

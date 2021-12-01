@@ -7,7 +7,6 @@
 #include <assert.h>
 
 
-static int  printNodeValue(Node *node);
 static void printType(Node *node);
 
 
@@ -203,7 +202,7 @@ Node *searchElem(Node *node, type_t elem)
 }
 */
 
-static int printNodeValue(Node *node)
+int printNodeValue(Node *node)
 {
     assert(node);
 
@@ -260,23 +259,7 @@ int printTree(Node *node)
         printTree(node->left_child);
     }
 
-    if (node->node_type & IS_FUNC)
-    {
-        printf("%s", node->value.func);
-    }
-    else if (node->node_type & IS_NUMBER)
-    {
-        printf("%lg", node->value.number);
-    }
-    else if ((node->node_type & IS_VARIABLE) || (node->node_type & IS_OPERATOR))
-    {
-        printf("%c", node->value.symbol);
-    }
-    else
-    {
-        printf("!!! ERROR Invalid node_type !!!\n");
-        return -1;
-    }
+    printNodeValue(node);
 
     if (node->right_child)
     {

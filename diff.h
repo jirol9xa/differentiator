@@ -30,6 +30,7 @@
     int cutTree(Tree *tree);
 
     int beginTex();
+    int texOrigin(Tree *tree);
     int texDump(Tree *tree);
     int finishTex();
 

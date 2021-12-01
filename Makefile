@@ -1,4 +1,4 @@
 main:
-	g++ diff_main.cpp diff.cpp Tree/Tree.cpp textLib.cpp logsLib.cpp -o diff 
+	g++ diff_main.cpp diff.cpp Tree/Tree.cpp textLib.cpp texDump.cpp logsLib.cpp -o diff 
 debug:
-	g++ diff_main.cpp diff.cpp Tree/Tree.cpp textLib.cpp logsLib.cpp -o diff -fsanitize=address,leak,undefined
+	g++ diff_main.cpp diff.cpp Tree/Tree.cpp textLib.cpp texDump.cpp logsLib.cpp -o diff -fsanitize=address,leak,undefined
