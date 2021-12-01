@@ -57,4 +57,6 @@ int texOrigin(Tree *tree)
     writeLogs("\\subsection{Originally\n");
     printTree(tree->root);
     writeLogs("\n}\n");
+
+    return 0;
 }

@@ -109,7 +109,6 @@ int nodeDtor (Node *node)
     {
         Node *left = node->left_child;
         nodeDtor(left);
-        
     }
 
     if (node->right_child)

@@ -17,14 +17,6 @@
 
     int diffNode(Node *dest, Node *sourse);
     int treeCpy (Node *dest, Node *sourse);
-    int diffMul (Node *dest, Node *sourse);
-    int diffAdd (Node *dest, Node *sourse);
-    int diffSub (Node *dest, Node *sourse);
-    int diffDiv (Node *dest, Node *sourse);
-    int diffCos (Node *dest, Node *sourse);
-    int diffSin (Node *dest, Node *sourse);
-    int diffLn  (Node *dest, Node *sourse);
-    int diffPow (Node *dest, Node *sourse);
 
     int removeConstant(Tree *tree);
     int cutTree(Tree *tree);

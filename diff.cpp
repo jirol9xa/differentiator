@@ -9,8 +9,6 @@
 #include "Tree/Tree.h"
 #include "diff.h"
 
-extern Tree rslt_tree;
-
 
 #define NEW_NUMBER_NODE(arg)                                                                 \
     dest->node_type    = IS_NUMBER;                                                          \
@@ -20,6 +18,16 @@ extern Tree rslt_tree;
 #define RIGHT(arg)     arg->right_child
 #define LEFTLEFT(arg)  arg->left_child->left_child
 #define LEFTRIGHT(arg) arg->left_child->right_child
+
+
+static int diffMul (Node *dest, Node *sourse);
+static int diffAdd (Node *dest, Node *sourse);
+static int diffSub (Node *dest, Node *sourse);
+static int diffDiv (Node *dest, Node *sourse);
+static int diffCos (Node *dest, Node *sourse);
+static int diffSin (Node *dest, Node *sourse);
+static int diffLn  (Node *dest, Node *sourse);
+static int diffPow (Node *dest, Node *sourse);
 
 static int removeConst(Node *node);
 static int cutNode(Node *node, Tree *tree);
@@ -109,7 +117,7 @@ int readArg(Node *node, char *text)
     }
     else if (text[i + 1] != '(' && text[i + 1] != ')' && text[i + 1] != ' ')
     {
-        PRINT_LINE;
+        
         node->node_type = IS_FUNC;
         sscanf(text + i, "%m[cosinl]", &(node->value.func));
 
@@ -126,7 +134,6 @@ int readArg(Node *node, char *text)
             node->node_type |= IS_LN;
             break;
         }
-
 
         return i + strlen(node->value.func) - 1;
     }
@@ -174,8 +181,6 @@ int diffNode(Node *dest, Node *sourse)
     assert(dest);
     assert(sourse);
 
-    //treeDump(&rslt_tree);
-
     switch (sourse->node_type & (IS_COS - 1))
     {
         case IS_VARIABLE:
@@ -187,11 +192,11 @@ int diffNode(Node *dest, Node *sourse)
             switch (sourse->value.symbol)
             {
                 case '*':
-                    PRINT_LINE;
+                    
                     diffMul(dest, sourse);
                     break;
                 case '+':
-                    PRINT_LINE;
+                    
                     diffAdd(dest, sourse);
                     break;
                 case '-':
@@ -228,7 +233,7 @@ int treeCpy(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
-    PRINT_LINE;
+    
     dest->node_type = sourse->node_type;
     
     switch (dest->node_type)
@@ -265,7 +270,7 @@ int treeCpy(Node *dest, Node *sourse)
 }
 
 
-int diffMul(Node *dest, Node *sourse)
+static int diffMul(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -296,7 +301,7 @@ int diffMul(Node *dest, Node *sourse)
 }
 
 
-int diffAdd(Node *dest, Node *sourse)
+static int diffAdd(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -314,7 +319,7 @@ int diffAdd(Node *dest, Node *sourse)
 }
 
 
-int diffSub(Node *dest, Node *sourse)
+static int diffSub(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -332,7 +337,7 @@ int diffSub(Node *dest, Node *sourse)
 }
 
 
-int diffDiv(Node *dest, Node *sourse)
+static int diffDiv(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -353,7 +358,6 @@ int diffDiv(Node *dest, Node *sourse)
 
     treeCpy(RIGHT(dest)->left_child,  sourse->right_child);
     treeCpy(RIGHT(dest)->right_child, sourse->right_child);
-    
 
     LEFTLEFT(dest)  = nodeCtor(LEFT(dest), LEFTLEFT(dest), 1);
     LEFTRIGHT(dest) = nodeCtor(LEFT(dest), LEFTRIGHT(dest), 0);
@@ -378,7 +382,7 @@ int diffDiv(Node *dest, Node *sourse)
 }
 
 
-int diffCos(Node *dest, Node *sourse)
+static int diffCos(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -407,7 +411,7 @@ int diffCos(Node *dest, Node *sourse)
 }
 
 
-int diffSin(Node *dest, Node *sourse)
+static int diffSin(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -430,7 +434,7 @@ int diffSin(Node *dest, Node *sourse)
 }
 
 
-int diffLn(Node *dest, Node *sourse)
+static int diffLn(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -448,7 +452,7 @@ int diffLn(Node *dest, Node *sourse)
 }
 
 
-int diffPow(Node *dest, Node *sourse)
+static int diffPow(Node *dest, Node *sourse)
 {
     assert(dest);
     assert(sourse);
@@ -634,8 +638,7 @@ static int cutAddSub(Node *node, Tree *tree)
 {
     assert(node);
     assert(tree);
-    PRINT_LINE;
-
+    
     if (LEFT(node)->node_type & IS_NUMBER)
     {
         if (LEFT(node)->value.number == 0)
@@ -688,9 +691,7 @@ static int cutAddSub(Node *node, Tree *tree)
 static int cutMul(Node *node, Tree *tree)
 {
     assert(node);
-    assert(tree);
-
-    PRINT_LINE;
+    assert(tree);    
 
     if (LEFT(node)->node_type & IS_NUMBER)
     {
@@ -718,23 +719,22 @@ static int cutMul(Node *node, Tree *tree)
             
             if (node != tree->root && node->parent->left_child == node)
             {
-                PRINT_LINE;
+                
                 node->parent->left_child = LEFT(node);
             }
             else if (node != tree->root)
             {
-                PRINT_LINE;
+                
                 node->parent->right_child = LEFT(node);
             }
             else
             {
-                PRINT_LINE;
+                
                 tree->root = LEFT(node);
             }
 
-            PRINT_LINE;
             nodeDtor(RIGHT(node));
-            PRINT_LINE;
+            
             free(node);
             return 0;
         }
@@ -821,22 +821,20 @@ static int cutDiv(Node *node, Tree *tree)
 int optimiz(Tree *tree)
 {
     assert(tree);
-    //PRINT_LINE;
+    
     int is_optimized = 0;
 
     do
     {
         is_optimized = 0;
-        PRINT_LINE;
+        
         texDump(tree);
         is_optimized += removeConstant(tree);
         printf("after remove = %d\n", is_optimized);
-        PRINT_LINE;
-        //treeDump(&rslt_tree);
+        
         is_optimized += cutTree(tree);
         printf("after cut = %d\n", is_optimized);
-        PRINT_LINE;
-        //treeDump(&rslt_tree);
+        
     } while (is_optimized);
     
     return 0;
