@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "include/textLib.h"
+#include "../Include/textLib.h"
 
 int constructText(FILE *sourse, Text *text)
 {

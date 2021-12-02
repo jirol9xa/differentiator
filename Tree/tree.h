@@ -24,7 +24,12 @@
     {
         Node* root;
         int size;
-        int status;
+        struct 
+        {
+            unsigned empty_tree      : 1;
+            unsigned updated_tree    : 1;
+            unsigned destructed_tree : 1;
+        } status;        
     };
     struct Path
     {

@@ -4,10 +4,10 @@
 #include <assert.h>
 #include <ctype.h>
 #include <cmath>
-#include "include/logsLib.h"
-#include "include/textLib.h"
-#include "Tree/Tree.h"
-#include "diff.h"
+#include "../Include/logsLib.h"
+#include "../Include/textLib.h"
+#include "tree.h"
+#include "../Include/differentiator.h"
 
 
 #define NEW_NUMBER_NODE(arg)                                                                 \
@@ -31,6 +31,7 @@ static int diffPow (Node *dest, Node *sourse);
 
 static int removeConst(Node *node);
 static int cutNode(Node *node, Tree *tree);
+static int cutCut(Tree *tree, Node *node, bool is_left);
 static int cutAddSub(Node *node, Tree *tree);
 static int cutMul(Node *node, Tree *tree);
 static int cutDiv(Node *node, Tree *tree);
@@ -40,7 +41,7 @@ int readFormula(FILE *sourse, Tree *tree)
 {
     assert(sourse);
     assert(tree);
-    if (tree->status & DESTRUCTED_TREE)
+    if (tree->status.destructed_tree)
     {
         printf("!!! ERROR Can't work with destructed tree\n");
         return -1;
@@ -54,8 +55,6 @@ int readFormula(FILE *sourse, Tree *tree)
 
     text[num_symb] = '\0';
 
-    assert(text);
-
     Node *cur_node = tree->root;
 
     for (int i = 0; i < num_symb && text[i] != '\n'; i++)
@@ -64,9 +63,9 @@ int readFormula(FILE *sourse, Tree *tree)
 
         if (text[i] == '(')
         {
-            if (tree->status & EMPTY_TREE)
+            if (tree->status.empty_tree)
             {
-                tree->status &= (~EMPTY_TREE);
+                tree->status.empty_tree = 0;
                 continue;
             }
             tree->size ++;
@@ -81,7 +80,7 @@ int readFormula(FILE *sourse, Tree *tree)
             else
             {
                 printf("!!! ERROR Node can't has more than two children !!!\n");
-                tree->status |= DESTRUCTED_TREE;
+                tree->status.destructed_tree = 1;
                 return -1;
             }
         }
@@ -115,7 +114,7 @@ int readArg(Node *node, char *text)
         node->value.number = number;
         return i + (int) log10(number);
     }
-    else if (text[i + 1] != '(' && text[i + 1] != ')' && text[i + 1] != ' ')
+    else if (!strchr("( )", text[i + 1]))
     {
         
         node->node_type = IS_FUNC;
@@ -126,7 +125,6 @@ int readArg(Node *node, char *text)
         case 'c':
             node->node_type |= IS_COS;
             break;
-        
         case 's':
             node->node_type |= IS_SIN;
             break;
@@ -143,7 +141,7 @@ int readArg(Node *node, char *text)
 
         char symbol = node->value.symbol;
 
-        if (symbol == '+' || symbol == '-' || symbol == '*' || symbol == '/')
+        if (strchr("+-/*", symbol))
         {
             node->node_type |= IS_OPERATOR;
             return i;
@@ -159,12 +157,12 @@ int diffur(Tree *sourse, Tree *result)
 {
     assert(sourse);
     assert(result);
-    if ((sourse->status & DESTRUCTED_TREE) || (result->status & DESTRUCTED_TREE))
+    if (sourse->status.destructed_tree || result->status.destructed_tree)
     {
         printf("!!! ERROR Can't work with destucted tree !!!\n");
         return -1;
     }
-    if (!(result->status & EMPTY_TREE))
+    if (!result->status.empty_tree)
     {
         printf("!!! ERROR Can't write in not empty tree !!!\n");
         return -1;
@@ -192,11 +190,9 @@ int diffNode(Node *dest, Node *sourse)
             switch (sourse->value.symbol)
             {
                 case '*':
-                    
                     diffMul(dest, sourse);
                     break;
                 case '+':
-                    
                     diffAdd(dest, sourse);
                     break;
                 case '-':
@@ -503,15 +499,13 @@ static int diffPow(Node *dest, Node *sourse)
 int removeConstant(Tree *tree)
 {
     assert(tree);
-    if (tree->status & DESTRUCTED_TREE)
+    if (tree->status.destructed_tree)
     {
         printf("!!! ERROR Can't work with destructed tree !!!\n");
         return -1;
     }
 
-    int is_removed = 0;
-
-    is_removed = removeConst(tree->root);
+    int is_removed = removeConst(tree->root);
 
     return is_removed;
 }
@@ -527,21 +521,23 @@ static int removeConst(Node *node)
     }
 
     int is_removed = 0;
+    int left_type  = LEFT(node)->node_type;
+    int right_type = RIGHT(node)->node_type;
 
-    if (LEFT(node)->node_type & IS_OPERATOR)
+    if (left_type & IS_OPERATOR)
     {
         is_removed += removeConst(LEFT(node));
     }
-    if (RIGHT(node)->node_type & IS_OPERATOR)
+    if (right_type & IS_OPERATOR)
     {
-        is_removed = removeConst(RIGHT(node));
+        is_removed += removeConst(RIGHT(node));
     }
 
-    if ((LEFT(node)->node_type & IS_NUMBER) && (RIGHT(node)->node_type & IS_NUMBER))
+    if ((left_type & IS_NUMBER) && (right_type & IS_NUMBER))
     {
         node->node_type = IS_NUMBER;
 
-        int left = LEFT(node)->value.number;
+        int left  = LEFT(node)->value.number;
         int right = RIGHT(node)->value.number;
 
         switch (node->value.symbol)
@@ -579,15 +575,13 @@ static int removeConst(Node *node)
 int cutTree(Tree *tree)
 {
     assert(tree);
-    if (tree->status & DESTRUCTED_TREE)
+    if (tree->status.destructed_tree)
     {
         printf("!!! ERROR Can't work with destructed tree !!!\n");
         return -1;
     }
 
-    int is_cutted = 0;
-
-    is_cutted = cutNode(tree->root, tree);
+    int is_cutted = cutNode(tree->root, tree);
 
     return is_cutted;
 }
@@ -643,18 +637,7 @@ static int cutAddSub(Node *node, Tree *tree)
     {
         if (LEFT(node)->value.number == 0)
         {
-            if (node != tree->root && node->parent->left_child == node)
-            {
-                node->parent->left_child = RIGHT(node);
-            }
-            else if (node != tree->root)
-            {
-                node->parent->right_child = RIGHT(node);
-            }
-            else
-            {
-                tree->root = RIGHT(node);
-            }
+            cutCut(tree, node, 0);
 
             free(LEFT(node));
             free (node);
@@ -665,18 +648,7 @@ static int cutAddSub(Node *node, Tree *tree)
     {
         if (RIGHT(node)->value.number == 0)
         {
-            if (node != tree->root && node->parent->left_child == node)
-            {
-                node->parent->left_child = LEFT(node);
-            }
-            else if (node != tree->root)
-            {
-                node->parent->right_child = LEFT(node);
-            }
-            else
-            {
-                tree->root = LEFT(node);
-            }
+            cutCut(tree, node, 1);
 
             free(RIGHT(node));
             free(node);
@@ -697,18 +669,7 @@ static int cutMul(Node *node, Tree *tree)
     {
         if (LEFT(node)->value.number == 1)
         {
-            if (node != tree->root && node->parent->left_child == node)
-            {
-                node->parent->left_child = RIGHT(node);
-            }
-            else if (node != tree->root)
-            {
-                node->parent->right_child = RIGHT(node);
-            }
-            else
-            {
-                tree->root = RIGHT(node);
-            }
+            cutCut(tree, node, 0);
 
             free(LEFT(node));
             free(node);
@@ -716,22 +677,7 @@ static int cutMul(Node *node, Tree *tree)
         }
         if (LEFT(node)->value.number == 0)
         {
-            
-            if (node != tree->root && node->parent->left_child == node)
-            {
-                
-                node->parent->left_child = LEFT(node);
-            }
-            else if (node != tree->root)
-            {
-                
-                node->parent->right_child = LEFT(node);
-            }
-            else
-            {
-                
-                tree->root = LEFT(node);
-            }
+            cutCut(tree, node, 1);
 
             nodeDtor(RIGHT(node));
             
@@ -744,18 +690,7 @@ static int cutMul(Node *node, Tree *tree)
     {
         if (RIGHT(node)->value.number == 1)
         {
-            if (node != tree->root && node->parent->left_child == node)
-            {
-                node->parent->left_child = LEFT(node);
-            }
-            else if (node != tree->root)
-            {
-                node->parent->right_child = LEFT(node);
-            }
-            else
-            {
-                tree->root = LEFT(node);
-            }
+            cutCut(tree, node, 1);
 
             free(RIGHT(node));
             free(node);
@@ -763,18 +698,7 @@ static int cutMul(Node *node, Tree *tree)
         }
         if (RIGHT(node)->value.number == 0)
         {
-            if (node != tree->root && node->parent->left_child == node)
-            {
-                node->parent->left_child = RIGHT(node);
-            }
-            else if (node != tree->root)
-            {
-                node->parent->right_child = RIGHT(node);
-            }
-            else
-            {
-                tree->root = RIGHT(node);
-            }
+            cutCut(tree, node, 0);
             
             nodeDtor(LEFT(node));
             free(node);
@@ -795,18 +719,7 @@ static int cutDiv(Node *node, Tree *tree)
     {
         if (RIGHT(node)->value.number == 1)
         {
-            if (node != tree->root && node->parent->left_child == node)
-            {
-                node->parent->left_child = LEFT(node);
-            }
-            else if (node != tree->root)
-            {
-                node->parent->right_child = LEFT(node);
-            }
-            else
-            {
-                tree->root = LEFT(node);
-            }
+            cutCut(tree, node, 1);
 
             free(RIGHT(node));
             free(node);
@@ -837,5 +750,26 @@ int optimiz(Tree *tree)
         
     } while (is_optimized);
     
+    return 0;
+}
+
+
+static int cutCut(Tree *tree, Node *node, bool is_left)
+{
+    assert(node);
+
+    if (node != tree->root && node->parent->left_child == node)
+    {
+        node->parent->left_child = (is_left) ? LEFT(node) : RIGHT(node);
+    }
+    else if (node != tree->root)
+    {
+        node->parent->right_child = (is_left) ? LEFT(node) : RIGHT(node);
+    }
+    else
+    {
+        tree->root = (is_left) ? LEFT(node) : RIGHT(node);
+    }
+
     return 0;
 }

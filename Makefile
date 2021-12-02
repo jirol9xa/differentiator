@@ -3,24 +3,24 @@ DEBUG__FLAGS = -fsanitize=address,leak,undefined -Wall -g
 
 all: build
 
-build: diff_main.o diff.o logsLib.o textLib.o Tree.o texDump.o
-	$(CC) diff_main.o diff.o logsLib.o textLib.o Tree.o texDump.o -o diff
+build: main.o differentiator.o logsLib.o textLib.o tree.o texDump.o
+	$(CC) main.o differentiator.o logsLib.o textLib.o tree.o texDump.o -o diff
 
-debug: diff_main.o diff.o logsLib.o textLib.o Tree.o texDump.o
-	$(CC) diff_main.o diff.o logsLib.o textLib.o Tree.o texDump.o -o diff $(DEBUG__FLAGS)
+debug: main.o differentiator.o logsLib.o textLib.o tree.o texDump.o
+	$(CC) main.o differentiator.o logsLib.o textLib.o tree.o texDump.o -o diff $(DEBUG__FLAGS)
 
-diff_main.o: diff_main.cpp
-	$(CC) -c diff_main.cpp
-diff.o:	diff.cpp
-	$(CC) -c diff.cpp
-logsLib.o: logsLib.cpp
-	$(CC) -c logsLib.cpp
-textLib.o: textLib.cpp
-	$(CC) -c textLib.cpp
-Tree.o: Tree/Tree.cpp
-	$(CC) -c Tree/Tree.cpp
-texDump.o: texDump.cpp
-	$(CC) -c texDump.cpp
+main.o: main.cpp
+	$(CC) -c main.cpp
+differentiator.o: Tree/differentiator.cpp
+	$(CC) -c Tree/differentiator.cpp
+logsLib.o: Logger/logsLib.cpp
+	$(CC) -c Logger/logsLib.cpp
+textLib.o: TextLib/textLib.cpp
+	$(CC) -c TextLib/textLib.cpp
+tree.o: Tree/tree.cpp
+	$(CC) -c Tree/tree.cpp
+texDump.o: Logger/texDump.cpp
+	$(CC) -c Logger/texDump.cpp
 
 clean:
 	rm -rf *.o diff

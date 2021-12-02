@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
-#include "include/logsLib.h"
+#include "../Include/logsLib.h"
 
 static FILE *logs = nullptr;
 

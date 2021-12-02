@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/logsLib.h"
-#include "Tree.h"
-#include "../diff.h"
+#include "../Include/logsLib.h"
+#include "tree.h"
+#include "../Include/differentiator.h"
 #include <assert.h>
 
 
@@ -37,7 +37,7 @@ int treeCtor(Tree *tree)
     tree->root = (Node *) calloc(1, sizeof(Node));
 
     tree->size = 1;
-    tree->status |= EMPTY_TREE;
+    tree->status.empty_tree = 1;;
     return 0;
 }
 
@@ -95,7 +95,7 @@ int treeDtor(Tree *tree)
     nodeDtor(tree->root);
     
     tree->size = -1;
-    tree->status |= DESTRUCTED_TREE;
+    tree->status.destructed_tree = 1;
 
     return 0;
 }
