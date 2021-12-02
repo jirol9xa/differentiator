@@ -4,10 +4,10 @@
 #include <assert.h>
 #include <ctype.h>
 #include <cmath>
-#include "../Include/logsLib.h"
-#include "../Include/textLib.h"
-#include "tree.h"
-#include "../Include/differentiator.h"
+#include "LogsLib.h"
+#include "TextLib.h"
+#include "Tree.h"
+#include "Differentiator.h"
 
 
 #define NEW_NUMBER_NODE(arg)                                                                 \
@@ -186,6 +186,7 @@ int diffNode(Node *dest, Node *sourse)
             break;
         case IS_NUMBER:
             NEW_NUMBER_NODE(0);
+            break;
         case IS_OPERATOR:
             switch (sourse->value.symbol)
             {

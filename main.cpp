@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "Tree/tree.h"
-#include "Include/textLib.h"
-#include "Include/logsLib.h"
-#include "Include/differentiator.h"
+#include "Tree/Tree.h"
+#include "TextLib.h"
+#include "LogsLib.h"
+#include "Differentiator.h"
 
 
 

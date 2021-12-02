@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../Include/logsLib.h"
-#include "tree.h"
-#include "../Include/differentiator.h"
+#include "LogsLib.h"
+#include "Tree.h"
+#include "Differentiator.h"
 #include <assert.h>
 
 

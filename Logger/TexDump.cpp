@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <string.h>
 #include <cmath>
-#include "../Include/logsLib.h"
-#include "../Tree/tree.h"
-#include "../Include/differentiator.h"
+#include "LogsLib.h"
+#include "../Tree/Tree.h"
+#include "Differentiator.h"
 
 
 int beginTex()
