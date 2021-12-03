@@ -15,7 +15,21 @@
     struct Node 
     {
         Value value;
-        int   node_type;
+        union 
+        {
+            struct 
+            {
+                unsigned is_operator : 1;
+                unsigned is_number   : 1;
+                unsigned is_variable : 1;
+                unsigned is_func     : 1;
+                unsigned is_cos      : 1;
+                unsigned is_sin      : 1;
+                unsigned is_ln       : 1;
+            } bytes;
+
+            unsigned int number;
+        } node_type;
         Node *left_child;
         Node *right_child;
         Node *parent;

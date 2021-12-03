@@ -24,7 +24,7 @@ int main(int argc, const char **argv)
     readFormula(sourse, &srs_tree);
     texOrigin(&srs_tree);
 
-    treeCtor(&rslt_tree);
+    treeCtor(&rslt_tree); 
 
     diffur(&srs_tree, &rslt_tree);
     optimiz(&rslt_tree);

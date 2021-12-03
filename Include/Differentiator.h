@@ -25,6 +25,11 @@
     int texOrigin(Tree *tree);
     int texDump(Tree *tree);
     int finishTex();
-
+    
+    
+    #define LEFT(arg)      arg->left_child
+    #define RIGHT(arg)     arg->right_child
+    #define LEFTLEFT(arg)  arg->left_child->left_child
+    #define LEFTRIGHT(arg) arg->left_child->right_child
 
 #endif

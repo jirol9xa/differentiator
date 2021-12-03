@@ -117,7 +117,7 @@ int nodeDtor (Node *node)
         nodeDtor(right);
     }
 
-    if (node->node_type & IS_FUNC)
+    if (node->node_type.bytes.is_func)
     {
         free(node->value.func);
     }
@@ -205,15 +205,15 @@ int printNodeValue(Node *node)
 {
     assert(node);
 
-    if (node->node_type & IS_FUNC)
+    if (node->node_type.bytes.is_func)
     {
         writeLogs("%s", node->value.func);
     }
-    else if (node->node_type & IS_NUMBER)
+    else if (node->node_type.bytes.is_number)
     {
         writeLogs("%lg", node->value.number);
     }
-    else if ((node->node_type & IS_VARIABLE) || (node->node_type & IS_OPERATOR))
+    else if (node->node_type.bytes.is_variable || node->node_type.bytes.is_operator)
     {
         writeLogs("%c", node->value.symbol);
     }
@@ -231,7 +231,7 @@ static void printType(Node *node)
 {
     assert(node);
 
-    switch (node->node_type)
+    switch (node->node_type.number)
     {
     case IS_OPERATOR:
         writeLogs("operator");
