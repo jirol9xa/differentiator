@@ -24,8 +24,6 @@ Node *nodeCtor(Node *parent, Node *new_node, int is_left)
         parent->left_child  = new_node;
     else         
         parent->right_child = new_node;
-
-    PRINT_LINE;
     return new_node; 
 }
 

@@ -126,27 +126,19 @@ static int cutNode(Node *node, Tree *tree)
     }
 
     int is_cutted = 0;
-    PRINT_LINE;
-    printf("left = %p\nright = %p\n", LEFT(node), RIGHT(node));
 
     if (LEFT(node)->node_type.bytes.is_operator)
     {
-        PRINT_LINE;
         is_cutted += cutNode(LEFT(node), tree);
-        PRINT_LINE;
     }
     if (RIGHT(node)->node_type.bytes.is_operator)
     {
-        PRINT_LINE;
-        printf("right = %p\n", RIGHT(node));
         is_cutted += cutNode(RIGHT(node), tree);
-        PRINT_LINE;
     }
 
     switch (node->value.symbol)
     {
         case '+':
-            PRINT_LINE;
             is_cutted += !cutAddSub(node, tree);
             break;
         case '-':
@@ -168,8 +160,6 @@ static int cutAddSub(Node *node, Tree *tree)
 {
     assert(node);
     assert(tree);
-
-    PRINT_LINE;
     
     if (LEFT(node)->node_type.bytes.is_number)
     {
@@ -191,8 +181,6 @@ static int cutAddSub(Node *node, Tree *tree)
             return 0;
         }
     }
-
-    PRINT_LINE;
 
     return -1;
 }
@@ -243,7 +231,7 @@ int optimiz(Tree *tree)
     {
         is_optimized = 0;
         
-        //texDump(tree);
+        texDump(tree);
         is_optimized += removeConstant(tree);
         is_optimized += cutTree(tree);
         
@@ -259,22 +247,16 @@ static int cutCut(Tree *tree, Node *node, bool is_left)
 
     if (node != tree->root && node->parent->left_child == node)
     {
-        PRINT_LINE;
         node->parent->left_child = (is_left) ? LEFT(node) : RIGHT(node);
-        PRINT_LINE;
     }
     else if (node != tree->root)
     {
-        PRINT_LINE;
         node->parent->right_child = (is_left) ? LEFT(node) : RIGHT(node);
-        PRINT_LINE;
     }
     else
     {
         tree->root = (is_left) ? LEFT(node) : RIGHT(node);
     }
-
-    PRINT_LINE;
 
     return 0;
 }

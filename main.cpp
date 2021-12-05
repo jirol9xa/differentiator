@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "Tree/Tree.h"
+#include "Tree.h"
 #include "TextLib.h"
 #include "LogsLib.h"
 #include "Differentiator.h"
@@ -18,10 +18,10 @@ int main(int argc, const char **argv)
     }
     FILE *sourse = fopen(argv[1], "r");
 
-    //beginTex();
+    beginTex();
 
     readFormula(sourse, &srs_tree);
-    //texOrigin(&srs_tree);
+    texOrigin(&srs_tree);
 
     treeCtor(&rslt_tree); 
 
@@ -30,7 +30,7 @@ int main(int argc, const char **argv)
 
     treeDtor(&rslt_tree);
     treeDtor(&srs_tree);
-    //finishTex();
+    finishTex();
     fclose(sourse);
     return 0;
 }

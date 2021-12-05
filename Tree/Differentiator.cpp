@@ -45,7 +45,7 @@ int readFormula(FILE *sourse, Tree *tree)
     text[num_symb] = '\0';
 
     constructTree(tree, text);
-    treeDump(tree);
+
     /*Node *cur_node = tree->root;
 
     for (int i = 0; i < num_symb && text[i] != '\n'; i++)
@@ -86,7 +86,6 @@ int readFormula(FILE *sourse, Tree *tree)
     }
     */
 
-    printf("root = %p\n", tree->root);   
     free(text);
     return 0;
 }

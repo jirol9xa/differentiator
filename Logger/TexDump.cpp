@@ -4,7 +4,7 @@
 #include <string.h>
 #include <cmath>
 #include "LogsLib.h"
-#include "../Tree/Tree.h"
+#include "Tree.h"
 #include "Differentiator.h"
 
 

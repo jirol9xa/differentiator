@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include "LogsLib.h"
-#include "../Tree/Tree.h"
+#include "Tree.h"
 #include "Recursive_descent.h"
 
 
@@ -21,7 +21,7 @@ static Node *GetT(Tokens *tokens, int *iter);
 static Node *GetP(Tokens *tokens, int *iter);
 static Node *GetN(Tokens *tokens, int *iter);
 static Node *GetE(Tokens *tokens, int *iter);
-
+static Node *GetF(Tokens *tokens, int *iter);
 
 
 char *S = nullptr;
@@ -41,11 +41,6 @@ int constructTree(Tree *tree, char *string)
     tokensCtor(&tokens);
     
     lexical(&tokens, string);
-
-    for (int i = 0; i < tokens.size; i++)
-    {
-        printf("type = %d\n", tokens.array[i]->node_type.number);
-    }
 
     tree->root = GetG(&tokens);
 
@@ -185,7 +180,7 @@ static Node *identific()
 
     node->node_type.bytes.is_func = 1;
 
-    node->value.func = (char *) calloc(strlen(buffer), sizeof(char));
+    node->value.func = (char *) calloc(strlen(buffer) + 1, sizeof(char));
     strcpy(node->value.func, buffer);
 
     if (strstr("sincosln", node->value.func))
@@ -215,7 +210,6 @@ static Node *oper()
 
     node->value.symbol = *S++;
     node->node_type.bytes.is_operator = 1;
-    printf("node value = %c\n", node->value.symbol);
 
     if (!strchr("+-/*^()$", node->value.symbol))
     {
@@ -240,7 +234,6 @@ static Node *GetG(Tokens *tokens)
     int iter = 0;
 
     Node *root = GetE(tokens, &iter);
-    printf("iter = %d\n", iter);
 
     if (tokens->array[iter]->node_type.bytes.is_operator && tokens->array[iter]->value.symbol == '$')
     {
@@ -248,7 +241,6 @@ static Node *GetG(Tokens *tokens)
     }
     else
     {
-        
         SyntaxError();
     }
 
@@ -318,14 +310,33 @@ static Node *GetN(Tokens *tokens, int *iter)
 
     if (tokens->array[*iter]->node_type.bytes.is_number || tokens->array[*iter]->node_type.bytes.is_variable)
     {   
-        printf("iter = %d\n", *iter);
         (*iter)++;
-        printf("iter = %d\n", *iter);
+
         return tokens->array[*iter - 1];
+    }
+    else if (tokens->array[*iter]->node_type.bytes.is_func)
+    {
+        Node *func = GetF(tokens, iter);
+        return func;
     }
     
     SyntaxError();
     return nullptr;
+}
+
+
+static Node *GetF(Tokens *tokens, int *iter)
+{
+    assert(tokens);
+    assert(iter);
+
+    Node *func = tokens->array[*iter];
+    (*iter)++;
+    
+    Node *args = GetE(tokens, iter);
+    func->left_child = args;
+
+    return func;
 }
 
 
@@ -335,12 +346,10 @@ static Node *GetE(Tokens *tokens, int *iter)
     assert(iter);
 
     Node *oper = nullptr;
-    
     Node *value = GetT(tokens, iter);
 
     while (tokens->array[*iter]->node_type.bytes.is_operator && strchr("+-", tokens->array[*iter]->value.symbol))
     {
-        
         oper = tokens->array[*iter];
         oper->left_child = value;
         (*iter)++;
