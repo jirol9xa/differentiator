@@ -9,10 +9,6 @@
     };
 
 
-    Tree *constructTree(Tree *tree, char *string);
-    int tokensCtor(Tokens *tokens);
-    Node *number();
-    Node *identific();
-    Node *oper();
+    int constructTree(Tree *tree, char *string);
 
 #endif

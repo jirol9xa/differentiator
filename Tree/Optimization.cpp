@@ -243,7 +243,7 @@ int optimiz(Tree *tree)
     {
         is_optimized = 0;
         
-        texDump(tree);
+        //texDump(tree);
         is_optimized += removeConstant(tree);
         is_optimized += cutTree(tree);
         

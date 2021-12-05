@@ -8,5 +8,5 @@
     void printReshetka();
     int FFFFFree(const char *file);
 
-    #define PRINT_LINE printf("[%s:%d]\n", __func__, __LINE__);
+    #define PRINT_LINE printf("[%s:%s:%d]\n", __FILE__, __func__, __LINE__);
 #endif

@@ -10,7 +10,6 @@ int main(int argc, const char **argv)
 {
     Tree srs_tree = {};
     Tree rslt_tree = {};
-    treeCtor(&srs_tree);
 
     if (argc < 2)
     {
@@ -19,10 +18,10 @@ int main(int argc, const char **argv)
     }
     FILE *sourse = fopen(argv[1], "r");
 
-    beginTex();
+    //beginTex();
 
     readFormula(sourse, &srs_tree);
-    texOrigin(&srs_tree);
+    //texOrigin(&srs_tree);
 
     treeCtor(&rslt_tree); 
 
@@ -31,7 +30,7 @@ int main(int argc, const char **argv)
 
     treeDtor(&rslt_tree);
     treeDtor(&srs_tree);
-    finishTex();
+    //finishTex();
     fclose(sourse);
     return 0;
 }
