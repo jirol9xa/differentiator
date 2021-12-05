@@ -64,7 +64,7 @@ void printNode(Node *node)
     
     writeLogs("    elem_%x[style = \"filled\", shape = record,fillcolor = \"#48D1CC\", label = \"", node);
     printNodeValue(node);
-    writeLogs("| type = ");
+    writeLogs("|");
     printType(node);
     writeLogs("\"];\n");
 
@@ -229,7 +229,7 @@ static void printType(Node *node)
 {
     assert(node);
 
-    switch (node->node_type.number)
+    switch (node->node_type.number & (IS_COS - 1))
     {
     case IS_OPERATOR:
         writeLogs("operator");
@@ -251,17 +251,30 @@ int printTree(Node *node)
 {
     assert(node);
 
+    if (node->node_type.bytes.is_func)      
+    {
+        printNodeValue(node);
+        writeLogs("(");
+    }
+
     if (node->left_child)
     {
         printTree(node->left_child);
     }
 
-    printNodeValue(node);
+    if (!node->node_type.bytes.is_func)     
+    {
+        printNodeValue(node);
+    }
 
     if (node->right_child)
     {
         printTree(node->right_child);
     }
 
+    if (node->node_type.bytes.is_func)      
+    {
+        writeLogs(")");
+    }
     return 0;
 }

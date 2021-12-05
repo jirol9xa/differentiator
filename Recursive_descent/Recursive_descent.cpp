@@ -333,8 +333,8 @@ static Node *GetF(Tokens *tokens, int *iter)
     Node *func = tokens->array[*iter];
     (*iter)++;
     
-    Node *args = GetE(tokens, iter);
-    func->left_child = args;
+    func->left_child = GetE(tokens, iter);
+    printf("type = %d\n", func->node_type.number);
 
     return func;
 }

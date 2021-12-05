@@ -18,19 +18,21 @@ int main(int argc, const char **argv)
     }
     FILE *sourse = fopen(argv[1], "r");
 
-    beginTex();
+    //beginTex();
 
     readFormula(sourse, &srs_tree);
-    texOrigin(&srs_tree);
+    //texOrigin(&srs_tree);
 
     treeCtor(&rslt_tree); 
-
+    treeDump(&srs_tree);
     diffur(&srs_tree, &rslt_tree);
+    treeDump(&rslt_tree);
     optimiz(&rslt_tree);
+    treeDump(&rslt_tree);
 
     treeDtor(&rslt_tree);
     treeDtor(&srs_tree);
-    finishTex();
+    //finishTex();
     fclose(sourse);
     return 0;
 }

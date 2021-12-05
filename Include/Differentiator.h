@@ -5,10 +5,9 @@
     const int IS_NUMBER   = 1 << 1;
     const int IS_VARIABLE = 1 << 2;
     const int IS_FUNC     = 1 << 3;
-
-    const int IS_COS      = 1 << 10;
-    const int IS_SIN      = 1 << 11;
-    const int IS_LN       = 1 << 12;
+    const int IS_COS      = 1 << 4;
+    const int IS_SIN      = 1 << 5;
+    const int IS_LN       = 1 << 6;
 
     int readFormula(FILE *sourse, Tree *tree);
     int readArg(Node *node, char *text);

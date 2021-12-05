@@ -231,7 +231,7 @@ int optimiz(Tree *tree)
     {
         is_optimized = 0;
         
-        texDump(tree);
+        //texDump(tree);
         is_optimized += removeConstant(tree);
         is_optimized += cutTree(tree);
         
@@ -256,6 +256,7 @@ static int cutCut(Tree *tree, Node *node, bool is_left)
     else
     {
         tree->root = (is_left) ? LEFT(node) : RIGHT(node);
+        tree->root->parent = nullptr;
     }
 
     return 0;

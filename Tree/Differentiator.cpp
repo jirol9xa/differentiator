@@ -195,7 +195,6 @@ int diffNode(Node *dest, Node *sourse)
                     diffDiv(dest, sourse);
                     break;
             }
-    
             break;
         case IS_FUNC:
             switch (sourse->node_type.number & (~(IS_COS - 1)))
@@ -225,7 +224,7 @@ int treeCpy(Node *dest, Node *sourse)
     
     dest->node_type = sourse->node_type;
     
-    switch (dest->node_type.number)
+    switch (dest->node_type.number & (IS_COS - 1))
     {
     case IS_VARIABLE:
         dest->value.symbol = sourse->value.symbol;
@@ -392,10 +391,13 @@ static int diffCos(Node *dest, Node *sourse)
 
     LEFTLEFT(dest)->node_type.bytes.is_func = 1;
     LEFTLEFT(dest)->node_type.bytes.is_sin  = 1;
-    LEFTLEFT(dest)->value.func = "sin";
+    LEFTLEFT(dest)->value.func = (char *) calloc(strlen("sin") + 1, sizeof(char));
+    strcpy(LEFTLEFT(dest)->value.func, "sin");
+
+    LEFTLEFT(dest)->left_child = nodeCtor(LEFTLEFT(dest), LEFTLEFT(dest)->left_child, 1);
     
     treeCpy(LEFTLEFT(dest)->left_child, sourse->left_child);
-    diffNode(LEFT(dest)->right_child, sourse->left_child);
+    diffNode(LEFTRIGHT(dest), sourse->left_child);
 
     return 0;
 }
@@ -413,7 +415,9 @@ static int diffSin(Node *dest, Node *sourse)
     RIGHT(dest) = nodeCtor(dest, RIGHT(dest), 0);
 
     LEFT(dest)->node_type.bytes.is_func = 1;
-    LEFT(dest)->value.func = "cos";
+    LEFT(dest)->node_type.bytes.is_cos  = 1;
+    LEFT(dest)->value.func = (char *) calloc(strlen("cos") + 1, sizeof(char));
+    strcpy(LEFT(dest)->value.func, "cos");
 
     LEFTLEFT(dest) = nodeCtor(LEFT(dest), LEFTLEFT(dest), 1);
 
