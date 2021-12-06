@@ -264,7 +264,14 @@ int printTree(Node *node)
 
     if (!node->node_type.bytes.is_func)     
     {
-        printNodeValue(node);
+        if (node->node_type.bytes.is_operator && node->value.symbol == '^')
+        {
+            writeLogs("**");
+        }
+        else
+        {
+            printNodeValue(node);
+        }
     }
 
     if (node->right_child)

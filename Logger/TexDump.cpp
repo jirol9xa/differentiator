@@ -21,7 +21,7 @@ int beginTex()
     writeLogs("This program is designed to satisfy true nerds... lovers of matanalysis."
               "All actions performed will be commented on and explained in detail.\n");
 
-    writeLogs("\\section{Taking a derivative}");
+    writeLogs("\\section{Taking a derivative}\n");
 
     return 0;
 }

@@ -17,6 +17,7 @@ static int cutCut(Tree *tree, Node *node, bool is_left);
 static int cutAddSub(Node *node, Tree *tree);
 static int cutMul(Node *node, Tree *tree);
 static int cutDiv(Node *node, Tree *tree);
+static int cutPow(Node *node, Tree *tree);
 
 static int foo(Node *node, Tree *tree);
 
@@ -29,7 +30,7 @@ int removeConstant(Tree *tree)
     if (tree->status.destructed_tree)
     {
         printf("!!! ERROR Can't work with destructed tree !!!\n");
-        return -1;
+        return 0;
     }
 
     int is_removed = removeConst(tree->root);
@@ -42,31 +43,38 @@ static int removeConst(Node *node)
 {
     assert(node);
 
-    if (!node->node_type.bytes.is_operator)
+    if (!(node->node_type.bytes.is_operator || node->node_type.bytes.is_func))
     {
         return 0;
     }
 
     int is_removed = 0;
     int left_type  = LEFT(node)->node_type.number;
-    int right_type = RIGHT(node)->node_type.number;
-
-    if (left_type & IS_OPERATOR)
+    int right_type = 0;
+    if (node->node_type.bytes.is_operator) 
+    {
+        right_type = RIGHT(node)->node_type.number;
+    }
+    
+    if ((left_type & IS_OPERATOR) || (left_type & IS_FUNC))
     {
         is_removed += removeConst(LEFT(node));
     }
-    if (right_type & IS_OPERATOR)
+    if (node->node_type.bytes.is_operator)
     {
-        is_removed += removeConst(RIGHT(node));
+        if ((right_type & IS_OPERATOR) || (right_type & IS_FUNC))
+        {
+            is_removed += removeConst(RIGHT(node));
+        }
     }
 
-    if ((left_type & IS_NUMBER) && (right_type & IS_NUMBER))
+    if (node->node_type.bytes.is_operator && (left_type & IS_NUMBER) && (right_type & IS_NUMBER))
     {
         node->node_type.bytes.is_number   = 1;
         node->node_type.bytes.is_operator = 0;
 
-        int left  = LEFT(node)->value.number;
-        int right = RIGHT(node)->value.number;
+        double left  = LEFT(node)->value.number;
+        double right = RIGHT(node)->value.number;
 
         switch (node->value.symbol)
         {
@@ -94,7 +102,33 @@ static int removeConst(Node *node)
         RIGHT(node) = nullptr;
 
         is_removed = 1;
+        return is_removed;
     }
+    if (node->node_type.bytes.is_func && (left_type & IS_NUMBER))
+    {
+        node->node_type.number = IS_NUMBER;
+
+        is_removed = 1;
+        free(node->value.func);
+
+        switch (node->node_type.number & (~(IS_COS - 1)))
+        {
+            case IS_SIN:
+                node->value.number = sin(node->left_child->value.number);
+                break;
+            case IS_COS:
+                node->value.number = cos(node->left_child->value.number);
+                break;
+            case IS_LN:
+                node->value.number = logl(node->left_child->value.number);
+                break;
+        }
+        
+        free(LEFT(node));
+        LEFT(node) = nullptr;
+        return is_removed; 
+    }
+    
 
     return is_removed;
 }
@@ -150,6 +184,9 @@ static int cutNode(Node *node, Tree *tree)
         case '/':
             is_cutted += !cutDiv(node, tree);
             break;
+        case '^':
+            is_cutted += !cutPow(node, tree);
+            break;
     }
 
     return is_cutted;
@@ -191,10 +228,15 @@ static int cutMul(Node *node, Tree *tree)
     assert(node);
     assert(tree);    
 
+    
+    int is_cutted = foo(node, tree);
+    if (!is_cutted)
+    {
+        return 0;
+    }
+    swap(&(LEFT(node)), &(RIGHT(node)), sizeof(Node *));
     foo(node, tree);
-    swap(LEFT(node), RIGHT(node), sizeof(Node *));
-    foo(node, tree);
-    swap(LEFT(node), RIGHT(node), sizeof(Node *));
+    swap(&(LEFT(node)), &(RIGHT(node)), sizeof(Node *));
     
     return -1;
 }
@@ -221,6 +263,54 @@ static int cutDiv(Node *node, Tree *tree)
 }
 
 
+static int cutPow(Node *node, Tree *tree)
+{
+    assert(node);
+    assert(tree);
+
+    if (LEFT(node)->node_type.bytes.is_number)
+    {
+        if (LEFT(node)->value.number == 1)
+        {
+            cutCut(tree, node, 0);
+
+            free(LEFT(node));
+            free(node);
+            return 0;
+        }
+        else if (LEFT(node)->value.number == 0)
+        {
+            cutCut(tree, node, 0);
+
+            nodeDtor(RIGHT(node));
+            free(node);
+            return 0;
+        }
+    }
+    if (RIGHT(node)->node_type.bytes.is_number)
+    {
+        if (RIGHT(node)->value.number == 1)
+        {
+            cutCut(tree, node, 1);
+
+            free(RIGHT(node));
+            free(node);
+            return 0;
+        }
+        else if (RIGHT(node)->value.number == 0)
+        {
+            cutCut(tree, node, 1);
+
+            nodeDtor(LEFT(node));
+            free(node);
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+
 int optimiz(Tree *tree)
 {
     assert(tree);
@@ -236,6 +326,7 @@ int optimiz(Tree *tree)
         is_optimized += cutTree(tree);
         
     } while (is_optimized);
+    //texDump(tree);
     
     return 0;
 }
@@ -248,10 +339,12 @@ static int cutCut(Tree *tree, Node *node, bool is_left)
     if (node != tree->root && node->parent->left_child == node)
     {
         node->parent->left_child = (is_left) ? LEFT(node) : RIGHT(node);
+        node->parent->left_child->parent = node->parent;        
     }
     else if (node != tree->root)
     {
         node->parent->right_child = (is_left) ? LEFT(node) : RIGHT(node);
+        node->parent->right_child->parent = node->parent;        
     }
     else
     {
@@ -286,26 +379,15 @@ static int foo(Node *node, Tree *tree)
         }
     }
 
-    return 0;
+    return -1;
 }
 
 
 static int swap(void *element1, void *element2, unsigned int element_size)
 {
-
     char *elem1 = (char *) element1;
     char *elem2 = (char *) element2;
 
-    while (element_size >= 16) 
-    {
-        __int128_t buffer = *((__int128_t *) elem1);
-        *((__int128_t *) elem1) = *((__int128_t *) elem2);
-        *((__int128_t *) elem2) = buffer;
-
-        elem1 += 16;
-        elem2 += 16;
-        element_size -= 16;
-    }
     while (element_size >= 8) 
     {
         __int64_t buffer = *((__int64_t *) elem1);

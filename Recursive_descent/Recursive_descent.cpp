@@ -116,7 +116,6 @@ static int lexical(Tokens *tokens, char *string)
 
         return 0;
     }
-
     SyntaxError();
     return -1;
 }
@@ -258,7 +257,7 @@ static Node *GetT(Tokens *tokens, int *iter)
     
     Node *value = GetP(tokens, iter);
 
-    while (tokens->array[*iter]->node_type.bytes.is_operator && strchr("*/", tokens->array[*iter]->value.symbol))
+    while (tokens->array[*iter]->node_type.bytes.is_operator && strchr("*^/", tokens->array[*iter]->value.symbol))
     {
         oper = tokens->array[*iter];
         oper->left_child = value;
@@ -291,7 +290,7 @@ static Node *GetP(Tokens *tokens, int *iter)
             free(tokens->array[*iter - 1]);
             return value;
         }
-        
+
         SyntaxError();
     }
     else
@@ -333,8 +332,7 @@ static Node *GetF(Tokens *tokens, int *iter)
     Node *func = tokens->array[*iter];
     (*iter)++;
     
-    func->left_child = GetE(tokens, iter);
-    printf("type = %d\n", func->node_type.number);
+    func->left_child = GetP(tokens, iter);
 
     return func;
 }

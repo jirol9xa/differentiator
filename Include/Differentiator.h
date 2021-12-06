@@ -24,6 +24,9 @@
     int texOrigin(Tree *tree);
     int texDump(Tree *tree);
     int finishTex();
+
+    double calcDiff(Tree *tree, double x);
+
     
     
     #define LEFT(arg)      arg->left_child

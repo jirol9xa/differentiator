@@ -25,6 +25,9 @@ static int diffSin (Node *dest, Node *sourse);
 static int diffLn  (Node *dest, Node *sourse);
 static int diffPow (Node *dest, Node *sourse);
 
+static int setX(Node *node, double x);
+
+
 
 int readFormula(FILE *sourse, Tree *tree)
 {
@@ -193,6 +196,9 @@ int diffNode(Node *dest, Node *sourse)
                     break;
                 case '/':
                     diffDiv(dest, sourse);
+                    break;
+                case '^':
+                    diffPow(dest, sourse);
                     break;
             }
             break;
@@ -494,3 +500,35 @@ static int diffPow(Node *dest, Node *sourse)
 }
 
 
+double calcDiff(Tree *tree, double x)
+{
+    assert(tree);
+
+    setX(tree->root, x);
+    optimiz(tree);
+    return tree->root->value.number;
+}
+
+
+static int setX(Node *node, double x)
+{
+    assert(node);
+
+    if (LEFT(node))
+    {
+        setX(LEFT(node), x);
+    }
+    if (RIGHT(node))
+    {
+        setX(RIGHT(node), x);
+    }
+
+    if (node->node_type.bytes.is_variable)
+    {
+        node->node_type.bytes.is_variable = 0;
+        node->node_type.bytes.is_number   = 1;
+        node->value.number                = x;
+    }
+
+    return 0;
+}
